@@ -1,0 +1,106 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cave Dig - play credits demo</title><meta name="description" content="Free play-credit demo. 30% player win chance shown openly. No real money."><style>*{box-sizing:border-box;margin:0}
+:root{--bg:#070a14;--ink:#eef2ff;--mut:#98a2c3;--acc:#7cf0c8;--acc2:#ffb454;--bad:#ff6b7a;--glass:rgba(255,255,255,.07);--line:rgba(255,255,255,.14)}
+html,body{min-height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+body{overflow-x:hidden}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+.wrap{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:14px 14px 40px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:6px 2px 12px}
+h1{font-size:clamp(26px,6vw,44px);letter-spacing:-.02em;line-height:1;background:linear-gradient(120deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+.tag{color:var(--mut);font-size:14px;margin-top:6px}
+.badge{font-size:11px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--line);border-radius:99px;padding:6px 10px;color:var(--mut);background:var(--glass)}
+.hud{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.hud div{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:10px 8px;text-align:center;backdrop-filter:blur(8px)}
+.hud b{display:block;font-size:clamp(18px,4.5vw,26px);font-variant-numeric:tabular-nums}
+.hud span{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em}
+.odds{display:flex;gap:8px;margin-bottom:12px}
+.odds .o{flex:1;border-radius:14px;padding:10px 12px;border:1px solid var(--line);background:var(--glass);font-size:12px;color:var(--mut)}
+.odds .o b{white-space:nowrap;font-size:21px;color:var(--ink);display:block}
+.odds .o.p b{color:var(--acc)}.odds .o.a b{color:var(--bad)}
+.odds .bar{height:6px;border-radius:9px;margin-top:6px;background:rgba(255,255,255,.1);overflow:hidden}
+.odds .bar i{display:block;height:100%;background:var(--acc)}
+.odds .o.a .bar i{background:var(--bad)}
+.stage{position:relative;border-radius:22px;border:1px solid var(--line);background:rgba(8,12,26,.55);backdrop-filter:blur(6px);padding:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.btn{appearance:none;border:0;cursor:pointer;font:inherit;font-weight:700;color:#04110c;background:linear-gradient(135deg,var(--acc),#a9ffdf);padding:14px 22px;border-radius:14px;font-size:16px;box-shadow:0 8px 24px rgba(124,240,200,.25);transition:transform .12s,filter .12s;min-height:48px}
+.btn:hover{filter:brightness(1.08)}.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.btn.ghost{background:var(--glass);color:var(--ink);border:1px solid var(--line);box-shadow:none}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.result{margin-top:12px;border-radius:14px;padding:12px 14px;text-align:center;border:1px solid var(--line);animation:pop .35s ease}
+.result.win{background:rgba(124,240,200,.14);border-color:rgba(124,240,200,.5)}
+.result.loss{background:rgba(255,107,122,.12);border-color:rgba(255,107,122,.4)}
+.result b{display:block;font-size:20px}.result span{color:var(--mut);font-size:14px}
+.hint{text-align:center;color:var(--mut);font-size:13px;margin-top:10px}
+.hist{display:flex;gap:5px;justify-content:center;margin-top:12px;flex-wrap:wrap;min-height:14px}
+.hist i{width:14px;height:14px;border-radius:50%;background:var(--bad);opacity:.8}.hist i.w{background:var(--acc)}
+details{margin-top:12px;background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px;color:var(--mut)}
+summary{cursor:pointer;color:var(--ink);font-weight:600}
+details p{margin-top:8px;line-height:1.5}
+footer{margin-top:16px;font-size:12px;color:var(--mut);text-align:center;line-height:1.5}
+.note{margin-top:10px;text-align:center;font-size:13px;color:var(--acc2)}
+@keyframes pop{from{transform:scale(.94);opacity:0}to{transform:none;opacity:1}}
+@keyframes shake{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style></head><body><script>const STAKE=10,START=100;
+function randInt(n){const lim=Math.floor(0x100000000/n)*n,b=new Uint32Array(1);do{crypto.getRandomValues(b)}while(b[0]>=lim);return b[0]%n}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=randInt(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
+const $=s=>document.querySelector(s);
+const Bank={credits:START,rounds:0,wins:0,hist:[]};
+function paintBank(){
+ $('#cr').textContent=Bank.credits;$('#rd').textContent=Bank.rounds;$('#wn').textContent=Bank.wins;
+ $('#rt').textContent=Bank.rounds?Math.round(Bank.wins/Bank.rounds*100)+'%':'-';
+ $('#hist').innerHTML=Bank.hist.map(w=>`<i class="${w?'w':''}" title="${w?'win':'loss'}"></i>`).join('');
+ const br=$('#brk');if(br)br.style.display=Bank.rounds>=25?'block':'none';
+}
+function settle(win){Bank.credits+=win?STAKE:-STAKE;Bank.rounds++;if(win)Bank.wins++;Bank.hist=[win,...Bank.hist].slice(0,24);paintBank()}
+function canPlay(){return Bank.credits>=STAKE}
+function showResult(win,detail){const r=$('#result');r.className='result '+(win?'win':'loss');r.style.display='block';
+ r.innerHTML=`<b>${win?'Win. +'+STAKE+' credits':'Not a win. -'+STAKE+' credits'}</b><span>${detail}</span>`;
+ if(!canPlay()){r.innerHTML+=`<span style="display:block;margin-top:6px">Out of credits. Reset to start again with ${START} play credits.</span>`}}
+function resetBank(){Bank.credits=START;Bank.rounds=0;Bank.wins=0;Bank.hist=[];paintBank();if(window.onReset)onReset()}
+function shell(o){
+document.body.innerHTML=`<canvas id="bg"></canvas><div class="wrap">
+<header class="top"><div><h1>${o.title}</h1><div class="tag">${o.tag}</div></div><div class="badge">Play credits only</div></header>
+<div class="hud"><div><b id="cr">${START}</b><span>Credits</span></div><div><b id="rd">0</b><span>Rounds</span></div><div><b id="wn">0</b><span>Wins</span></div><div><b id="rt">-</b><span>Your win rate</span></div></div>
+<div class="odds"><div class="o p"><b>30%</b>player wins<div class="bar"><i style="width:30%"></i></div></div><div class="o a"><b>70%</b>admin wins<div class="bar"><i style="width:70%"></i></div></div><div class="o"><b>${STAKE} &rarr; ${STAKE*2}</b>stake, win returns<div class="bar"><i style="width:100%;background:var(--acc2)"></i></div></div></div>
+<div class="stage" id="stage">${o.stage}<div id="result" class="result" style="display:none"></div><div class="actions" id="actions"></div><div class="hint" id="hint"></div><div class="hist" id="hist"></div><div class="note" id="brk" style="display:none">Good time for a break. Nothing is owed and nothing carries over.</div></div>
+<details><summary>Rules and fairness</summary>${o.rules}<p>Randomness comes from your browser's secure random generator. Each round is independent: past results never change the next one. Credits have no cash value. There are no deposits, withdrawals or prizes. Balance resets when you reload.</p></details>
+<div class="actions"><button class="btn ghost" id="resetBtn" type="button">Reset credits</button></div>
+<footer>Free demo for fun. The 70% admin edge is shown openly, so expect to lose more than you win.</footer></div>`;
+$('#resetBtn').onclick=resetBank;paintBank();}
+function setActions(list){const a=$('#actions');a.innerHTML='';list.forEach(([label,fn,cls,dis])=>{const b=document.createElement('button');b.type='button';b.className='btn '+(cls||'');b.textContent=label;b.disabled=!!dis;b.onclick=fn;a.appendChild(b)})}
+/* ambient particle background */
+function ambient(cfg){const c=$('#bg'),x=c.getContext('2d');let W,H;const P=[];
+ function rs(){W=c.width=innerWidth;H=c.height=innerHeight}rs();addEventListener('resize',rs);
+ for(let i=0;i<cfg.n;i++)P.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*cfg.r+.4,vx:(Math.random()-.5)*cfg.vx,vy:cfg.vy*(.4+Math.random()),a:Math.random()*6.28,c:cfg.cols[i%cfg.cols.length]});
+ function f(t){x.clearRect(0,0,W,H);const g=x.createRadialGradient(W/2,H*cfg.gy,0,W/2,H*cfg.gy,Math.max(W,H)*.8);g.addColorStop(0,cfg.g0);g.addColorStop(1,cfg.g1);x.fillStyle=g;x.fillRect(0,0,W,H);
+  for(const p of P){p.x+=p.vx;p.y+=p.vy;p.a+=.02;if(p.y<-5)p.y=H+5;if(p.y>H+5)p.y=-5;if(p.x<-5)p.x=W+5;if(p.x>W+5)p.x=-5;x.globalAlpha=.35+.35*Math.sin(p.a);x.fillStyle=p.c;x.beginPath();x.arc(p.x,p.y,p.r,0,6.28);x.fill()}
+  x.globalAlpha=1;if(cfg.after)cfg.after(x,W,H,t);requestAnimationFrame(f)}requestAnimationFrame(f)}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+let gems=null,dug=null,busy=false;
+shell({title:'Cave Dig',tag:'Dig one tile. Find a gem.',
+stage:`<div class="cave" id="cave"><div class="torch" id="torch"></div><div class="grid" id="grid"></div></div>`,
+rules:`<p>Six gems are buried among 20 cave tiles. Dig one tile. If it holds a gem, you win.</p><p><b>Win chance: 6 of 20 tiles, so 30%, wherever you dig.</b> Gems are placed at random after you dig, so no tile is luckier and earlier digs never help.</p><p>Stake ${STAKE} play credits. A gem returns ${STAKE*2} total, no gem returns 0.</p>`});
+ambient({n:50,r:1.8,vx:.3,vy:-.25,cols:['#ffb06a','#ff8a3d','#ffd9a0'],gy:.9,g0:'#3b1d0c',g1:'#060302'});
+const css=document.createElement('style');css.textContent=`
+.cave{position:relative;border-radius:18px;padding:12px;background:#120a06;box-shadow:inset 0 0 60px #000;overflow:hidden}
+.torch{position:absolute;inset:0;pointer-events:none;z-index:3;background:radial-gradient(circle 190px at var(--tx,50%) var(--ty,40%),transparent 0,rgba(0,0,0,.25) 55%,rgba(0,0,0,.72) 100%)}
+.grid{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(5px,1.6vw,10px);z-index:1}
+.t{aspect-ratio:1;border:0;border-radius:12px;cursor:pointer;position:relative;overflow:hidden;font:inherit;color:#fff;background:radial-gradient(circle at 30% 25%,#8a6a4a,#4a3524 60%,#2a1d12);box-shadow:inset 0 -6px 10px rgba(0,0,0,.45),inset 0 3px 4px rgba(255,255,255,.18),0 4px 8px rgba(0,0,0,.5);transition:transform .15s}
+.t:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 70% 70%,rgba(0,0,0,.25) 0 8%,transparent 9%),radial-gradient(circle at 25% 65%,rgba(0,0,0,.2) 0 6%,transparent 7%),radial-gradient(circle at 60% 25%,rgba(255,255,255,.12) 0 5%,transparent 6%)}
+.t:hover:not(:disabled){transform:scale(1.06)}.t span{position:relative;font-size:clamp(20px,6vw,36px)}
+.t.open{background:radial-gradient(circle,#1d120b,#0b0604);box-shadow:inset 0 0 14px #000}
+.t.gem{background:radial-gradient(circle,#0e3b4a,#05141a);box-shadow:inset 0 0 18px #3de0ff}.t.gem.me{box-shadow:0 0 0 3px #7cf0c8,0 0 24px #7cf0c8,inset 0 0 18px #3de0ff;animation:pop .4s}
+.t.empty.me{box-shadow:0 0 0 3px #ff6b7a,inset 0 0 14px #000}
+.t.dig{animation:shake .35s}.t.dim{opacity:.55}
+.sp{position:absolute;width:6px;height:6px;border-radius:50%;background:#b08a5f;pointer-events:none;z-index:2}`;document.head.appendChild(css);
+const grid=$('#grid');for(let i=0;i<20;i++){const b=document.createElement('button');b.type='button';b.className='t';b.setAttribute('aria-label','Dig tile '+(i+1));b.innerHTML='<span></span>';b.onclick=()=>dig(i);grid.appendChild(b)}
+const cave=$('#cave');cave.addEventListener('pointermove',e=>{const r=cave.getBoundingClientRect();cave.style.setProperty('--tx',(e.clientX-r.left)+'px');cave.style.setProperty('--ty',(e.clientY-r.top)+'px');$('#torch').style.setProperty('--tx',(e.clientX-r.left)+'px');$('#torch').style.setProperty('--ty',(e.clientY-r.top)+'px')});
+function debris(el){const r=el.getBoundingClientRect(),c=cave.getBoundingClientRect();for(let k=0;k<12;k++){const s=document.createElement('i');s.className='sp';s.style.left=(r.left-c.left+r.width/2)+'px';s.style.top=(r.top-c.top+r.height/2)+'px';cave.appendChild(s);const a=Math.random()*6.28,d=30+Math.random()*50;s.animate([{transform:'translate(0,0)',opacity:1},{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d+20}px)`,opacity:0}],{duration:650}).onfinish=()=>s.remove()}}
+async function dig(i){if(busy||gems||!canPlay())return;busy=true;const g=shuffle([...Array(20).keys()]).slice(0,6);gems=g;dug=i;const win=g.includes(i);
+ [...grid.children].forEach(t=>t.disabled=true);const el=grid.children[i];el.classList.add('dig');debris(el);await sleep(420);
+ [...grid.children].forEach((t,k)=>{t.classList.add('open');t.classList.add(g.includes(k)?'gem':'empty');if(k===i)t.classList.add('me');else t.classList.add('dim');t.firstChild.textContent=g.includes(k)?'💎':''});
+ settle(win);showResult(win,win?'You dug up a gem.':'Just rock. The gems are shown where they were buried.');busy=false;setActions([['New round',next]]);$('#hint').textContent=''}
+function next(){gems=null;dug=null;$('#result').style.display='none';[...grid.children].forEach(t=>{t.className='t';t.disabled=false;t.firstChild.textContent=''});setActions([]);$('#hint').textContent=`Digging costs ${STAKE} credits. Move your pointer to shift the torch.`}
+window.onReset=next;next();
+</script></body></html>
