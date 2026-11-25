@@ -84,9 +84,9 @@ rules:`<p>Six gems are buried among 20 cave tiles. Dig one tile. If it holds a g
 ambient({n:50,r:1.8,vx:.3,vy:-.25,cols:['#ffb06a','#ff8a3d','#ffd9a0'],gy:.9,g0:'#3b1d0c',g1:'#060302'});
 const css=document.createElement('style');css.textContent=`
 .cave{position:relative;border-radius:18px;padding:12px;background:#120a06;box-shadow:inset 0 0 60px #000;overflow:hidden}
-.torch{position:absolute;inset:0;pointer-events:none;z-index:3;background:radial-gradient(circle 280px at var(--tx,50%) var(--ty,40%),transparent 0,rgba(0,0,0,.08) 50%,rgba(0,0,0,.5) 100%)}
+.torch{position:absolute;inset:0;pointer-events:none;z-index:3;background:radial-gradient(circle 280px at var(--tx,50%) var(--ty,40%),transparent 0,rgba(0,0,0,0) 50%,rgba(0,0,0,.35) 100%)}
 .grid{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(5px,1.6vw,10px);z-index:1}
-.t{aspect-ratio:1;border:0;border-radius:12px;cursor:pointer;position:relative;overflow:hidden;font:inherit;color:#fff;background:radial-gradient(circle at 30% 25%,#8a6a4a,#4a3524 60%,#2a1d12);box-shadow:inset 0 -6px 10px rgba(0,0,0,.45),inset 0 3px 4px rgba(255,255,255,.18),0 4px 8px rgba(0,0,0,.5);transition:transform .15s}
+.t{aspect-ratio:1;border:0;border-radius:12px;cursor:pointer;position:relative;overflow:hidden;font:inherit;color:#fff;background:radial-gradient(circle at 30% 25%,#b08a60,#6a4e35 60%,#3a2a1b);box-shadow:inset 0 -6px 10px rgba(0,0,0,.45),inset 0 3px 4px rgba(255,255,255,.18),0 4px 8px rgba(0,0,0,.5);transition:transform .15s}
 .t:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 70% 70%,rgba(0,0,0,.25) 0 8%,transparent 9%),radial-gradient(circle at 25% 65%,rgba(0,0,0,.2) 0 6%,transparent 7%),radial-gradient(circle at 60% 25%,rgba(255,255,255,.12) 0 5%,transparent 6%)}
 .t:hover:not(:disabled){transform:scale(1.06)}.t span{position:relative;font-size:clamp(20px,6vw,36px)}
 .t.open{background:radial-gradient(circle,#1d120b,#0b0604);box-shadow:inset 0 0 14px #000}
